@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 /**
  * Derezzed, dei Daft Punk, dalla colonna sonora di TRON: Legacy — riprodotta
@@ -57,7 +57,7 @@ type EmbedController = {
 type SpotifyIFrameAPI = {
   createController: (
     elemento: HTMLElement,
-    opzioni: { uri: string; width?: string | number; height?: string | number },
+    opzioni: { uri: string; width?: string | number; height?: string | number; theme?: 0 | 1 },
     callback: (controller: EmbedController) => void,
   ) => void;
 };
@@ -70,23 +70,11 @@ declare global {
 }
 
 export function Musica() {
+  const involucro = useRef<HTMLDivElement>(null);
   const contenitore = useRef<HTMLDivElement>(null);
   const controller = useRef<EmbedController | null>(null);
   /* la pausa chiesta dall'utente vince sul riavvio automatico */
   const zittita = useRef(false);
-  const [suona, setSuona] = useState(false);
-
-  const alterna = useCallback(() => {
-    const c = controller.current;
-    if (!c) return;
-    if (zittita.current) {
-      zittita.current = false;
-      c.resume();
-    } else {
-      zittita.current = true;
-      c.pause();
-    }
-  }, []);
 
   useEffect(() => {
     let annullato = false;
@@ -108,6 +96,30 @@ export function Musica() {
         }
         controller.current = c;
 
+        /*  Il tema scuro.
+         *
+         *  `createController` accetta l'opzione `theme` e la butta: verificato,
+         *  il src dell'iframe esce senza. L'unico modo è metterlo sull'indirizzo
+         *  dopo la creazione — l'iframe si ricarica e l'accordo con l'API si
+         *  rifà da solo, quindi il controller continua a rispondere.
+         *
+         *  Serve perché di serie l'embed si tinge col colore della copertina —
+         *  qui l'azzurro di TRON — che in questa pagina è l'unica cosa fuori
+         *  tono. Il nero è l'unico colore che Spotify concede: il violetto
+         *  esatto richiederebbe un filtro sopra l'iframe, che tingerebbe anche
+         *  il loro logo, e alterare quel logo è vietato dalle loro linee guida.
+         *  Il legame col resto lo fa la cornice, che è nostra.
+         */
+        /*  L'iframe si cerca dall'involucro, non da `el`: `el` a questo punto
+         *  non è più nel documento — l'API lo ha sostituito — quindi il suo
+         *  genitore è nullo. Verificato: cercandolo da lì il tema non veniva
+         *  applicato e il src restava quello di serie.
+         */
+        const iframe = involucro.current?.querySelector("iframe");
+        if (iframe && !iframe.src.includes("theme=")) {
+          iframe.src = iframe.src + "&theme=0";
+        }
+
         c.addListener("ready", () => {
           /* il salto prima dell'avvio: al contrario si sentirebbe mezzo
              secondo di attacco prima dello stacco */
@@ -118,7 +130,15 @@ export function Musica() {
         c.addListener("playback_update", (e) => {
           const posizione = e.data?.position ?? 0;
           const durata = e.data?.duration ?? 0;
-          setSuona(!(e.data?.isPaused ?? true));
+          /*  La pausa chiesta a mano dal comando dentro il player: la si
+           *  registra per non scavalcarla col riavvio automatico. Si distingue
+           *  dalla fine della traccia perché arriva quando la posizione è
+           *  ancora dentro il brano.
+           */
+          const inPausa = e.data?.isPaused ?? true;
+          if (durata > 0 && posizione < durata - MARGINE_FINE_MS) {
+            zittita.current = inPausa;
+          }
 
           /*  Il riavvio, e si guarda la posizione — non lo stato di pausa.
            *
@@ -192,34 +212,25 @@ export function Musica() {
   }, []);
 
   return (
-    /*  Sta sopra la riga dei comandi e dalla stessa parte: i settaggi di questa
-     *  pagina vivono nell'angolo in basso a destra, e una cosa che si comanda
-     *  va dove si comandano le altre. Su schermo stretto i comandi stanno in
-     *  fondo al centro, e il player li segue lì.
+    /*  Nessun posizionamento qui: il player sta dentro la barra dei comandi,
+     *  ultimo della fila, quindi all'estrema destra con lo slider alla sua
+     *  sinistra. Su schermo stretto la barra va a capo e il player finisce
+     *  sotto, dove c'è spazio.
+     *
+     *  Il ritaglio va su un involucro, non sul nodo che passo all'API:
+     *  createController **sostituisce** quel nodo con il suo iframe, e con esso
+     *  spariscono le classi che gli avessi messo. Serve perché l'iframe ha un
+     *  fondo bianco di serie e il player dentro ha gli angoli arrotondati:
+     *  fuori dal raggio restavano quattro spicchi chiari.
+     *
+     *  La cornice viola è il modo lecito di legarlo alla pagina: il colore
+     *  dentro l'iframe non è nostro, il bordo intorno sì.
      */
-    <div className="absolute bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+3.75rem))] left-1/2 z-10 w-[min(22rem,calc(100vw-3rem))] -translate-x-1/2 sm:bottom-[4.75rem] sm:left-auto sm:right-8 sm:translate-x-0">
-      {/*  Il ritaglio va su un involucro, non sul nodo che passo all'API:
-       *  `createController` **sostituisce** quel nodo con il suo iframe, e con
-       *  esso spariscono le classi che gli avessi messo.
-       *
-       *  Serve perché l'iframe ha un fondo bianco di serie, e il player che ci
-       *  sta dentro ha gli angoli arrotondati: fuori dal raggio restavano
-       *  quattro spicchi chiari. Un `overflow-hidden` con lo stesso raggio del
-       *  player li taglia via.
-       */}
-      <div className="overflow-hidden rounded-xl">
-        <div ref={contenitore} />
-      </div>
-      <button
-        type="button"
-        onClick={alterna}
-        className="mt-2 block w-full text-center font-mono text-[0.68rem] uppercase tracking-[0.18em] text-faint transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-viola sm:text-right"
-      >
-        <span aria-hidden="true" className="text-viola">
-          ♪
-        </span>{" "}
-        {suona ? "Mute" : "Play"} · Derezzed
-      </button>
+    <div
+      ref={involucro}
+      className="w-[min(20rem,calc(100vw-3rem))] overflow-hidden rounded-xl ring-1 ring-viola/25 sm:w-[19rem]"
+    >
+      <div ref={contenitore} />
     </div>
   );
 }

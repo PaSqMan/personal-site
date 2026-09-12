@@ -23,8 +23,11 @@ export function Hero() {
 
   return (
     <main className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden py-20">
-      <PlasmaStage />
-      <Musica />
+      {/* il player entra nella barra dei comandi dello sfondo: i comandi della
+          pagina stanno tutti nella stessa riga, in basso a destra */}
+      <PlasmaStage>
+        <Musica />
+      </PlasmaStage>
 
       {/* Tutto centrato, e non per indecisione: questa pagina è una schermata
           sola, cioè un manifesto, e un manifesto si legge simmetrico. Il testo
