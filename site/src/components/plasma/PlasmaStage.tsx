@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 import { useMotoRidotto } from "@/lib/motoRidotto";
 
@@ -38,12 +38,7 @@ const CELLA_MAX = 22; /* caratteri grossi, si contano a occhio */
  */
 const MEZZO_CICLO_MS = 10_000;
 
-/**
- * `children` finisce nella colonna in basso, sotto lo slider: quella colonna è
- * il posto dei comandi di questa pagina, e chi ne ha uno lo mette lì invece di
- * aprirsi un angolo per conto proprio. Il player della musica arriva da qui.
- */
-export function PlasmaStage({ children }: { children?: ReactNode }) {
+export function PlasmaStage() {
   const [colore, setColore] = useState(true);
   const [cellW, setCellW] = useState(11);
   const motoRidotto = useMotoRidotto();
@@ -93,7 +88,7 @@ export function PlasmaStage({ children }: { children?: ReactNode }) {
 
       {/* `group` fa salire di tono l'insieme quando il puntatore entra in zona,
           non il singolo pezzo toccato. */}
-      <div className="group absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-10 flex flex-col items-center gap-3 font-mono text-[0.68rem] uppercase tracking-[0.18em] sm:inset-x-auto sm:bottom-7 sm:right-8 sm:items-end">
+      <div className="group absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-10 flex items-center justify-center font-mono text-[0.68rem] uppercase tracking-[0.18em] sm:inset-x-auto sm:bottom-8 sm:right-8 sm:justify-end">
         <label className="flex items-center gap-2.5">
           <span className="text-faint transition-colors group-hover:text-dim">Density</span>
           <input
@@ -108,7 +103,6 @@ export function PlasmaStage({ children }: { children?: ReactNode }) {
           />
         </label>
 
-        {children}
       </div>
     </>
   );
