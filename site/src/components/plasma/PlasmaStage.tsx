@@ -89,12 +89,12 @@ export function PlasmaStage() {
       {/* il velo non deve intercettare il puntatore: sotto c'è il campo.
           Due versioni, e non per vezzo: su un telefono il testo occupa quasi
           tutta la larghezza, quindi la macchia scura si sposta al centro e si fa
-          più coprente sotto il blocco di testo; su schermo largo il testo sta a
-          sinistra e basta aprire una zona d'ombra lì, lasciando libero il resto
-          del campo. */}
+          più coprente sotto il blocco di testo; su schermo largo la macchia si
+          allarga meno e resta al centro, dove ora sta il testo, lasciando
+          respirare il campo ai due lati. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_58%_at_40%_50%,rgba(7,6,12,0.9)_0%,rgba(7,6,12,0.62)_48%,rgba(7,6,12,0)_84%),linear-gradient(to_bottom,rgba(7,6,12,0.3)_0%,rgba(7,6,12,0)_22%,rgba(7,6,12,0.34)_74%,rgba(7,6,12,0.8)_94%,var(--background)_100%)] sm:bg-[radial-gradient(88%_66%_at_14%_38%,rgba(7,6,12,0.88)_0%,rgba(7,6,12,0.42)_44%,rgba(7,6,12,0)_74%),linear-gradient(to_bottom,rgba(7,6,12,0.28)_0%,rgba(7,6,12,0)_26%,rgba(7,6,12,0.42)_84%,var(--background)_100%)]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(120%_58%_at_50%_50%,rgba(7,6,12,0.9)_0%,rgba(7,6,12,0.62)_48%,rgba(7,6,12,0)_84%),linear-gradient(to_bottom,rgba(7,6,12,0.3)_0%,rgba(7,6,12,0)_22%,rgba(7,6,12,0.34)_74%,rgba(7,6,12,0.8)_94%,var(--background)_100%)] sm:bg-[radial-gradient(72%_62%_at_50%_46%,rgba(7,6,12,0.88)_0%,rgba(7,6,12,0.5)_46%,rgba(7,6,12,0)_78%),linear-gradient(to_bottom,rgba(7,6,12,0.28)_0%,rgba(7,6,12,0)_26%,rgba(7,6,12,0.42)_84%,var(--background)_100%)]"
       />
 
       {/* `group` fa salire di tono l'insieme quando il puntatore entra in zona,

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { site } from "@/content/site";
 
+import { Musica } from "./Musica";
 import { Typed } from "./Typed";
 
 /**
@@ -23,8 +24,14 @@ export function Hero() {
   return (
     <main className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden py-20">
       <PlasmaStage />
+      <Musica />
 
-      <Container>
+      {/* Tutto centrato, e non per indecisione: questa pagina è una schermata
+          sola, cioè un manifesto, e un manifesto si legge simmetrico. Il testo
+          allineato a sinistra ha senso quando sotto continua qualcosa e l'occhio
+          deve tornare a capo su una colonna; qui lasciava il peso tutto da una
+          parte con lo sfondo pieno dall'altra. */}
+      <Container className="text-center">
         {/* Il carattere retro è alto e stretto: con l'interlinea di serie le due
             righe si toccherebbero e il cursore a blocco sfonderebbe sotto, da
             qui il `leading` esplicito. */}
@@ -47,12 +54,12 @@ export function Hero() {
             la misura scende a 20em e il corpo di un gradino.
             Le due parole che contano stanno in bianco pieno e in semibold, il
             resto in grigio: l'occhio le prende prima di leggere. */}
-        <p className="mt-7 max-w-[20em] text-balance font-mono text-lg leading-[1.5] tracking-tight text-dim [text-shadow:0_1px_16px_rgba(7,6,12,0.92)] sm:text-2xl sm:leading-[1.45]">
+        <p className="mx-auto mt-7 max-w-[20em] text-balance font-mono text-lg leading-[1.5] tracking-tight text-dim [text-shadow:0_1px_16px_rgba(7,6,12,0.92)] sm:text-2xl sm:leading-[1.45]">
           Building <strong className="font-semibold text-ink">Software</strong> and{" "}
           <strong className="font-semibold text-ink">Artificial Intelligence</strong> Systems.
         </p>
 
-        <div className="mt-9 flex flex-wrap gap-2.5">
+        <div className="mt-9 flex flex-wrap justify-center gap-2.5">
           <Button href={`mailto:${persona.email}`} tone="primary">
             Email me
           </Button>

@@ -101,7 +101,13 @@ export function Typed({
             <span key={riga.testo} className={`block ${riga.className ?? ""}`}>
               {/* la riga completa, invisibile, tiene lo spazio; le lettere
                   scritte le stanno sopra */}
-              <span className="relative">
+              {/* `inline-block` perché il box invisibile faccia da misura anche
+                  dentro un blocco centrato, e `text-left` perché le lettere
+                  scritte partano dal suo bordo sinistro: se restassero centrate
+                  crescerebbero dal centro, spostandosi a ogni battuta. Così il
+                  nome finito è centrato nella pagina ma la macchina scrive da
+                  sinistra, come una macchina. */}
+              <span className="relative inline-block text-left">
                 <span className="invisible">{riga.testo}</span>
                 <span className="absolute inset-0 whitespace-pre">
                   {visibile}
