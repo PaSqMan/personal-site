@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, VT323 } from "next/font/google";
 
 import { site } from "@/content/site";
 
@@ -15,6 +15,16 @@ const sans = Inter({
 
 const mono = JetBrains_Mono({
   variable: "--font-mono-stack",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+/* VT323 è il carattere di un terminale DEC degli anni Settanta: serve al nome
+   che si scrive a macchina, dove il punto è proprio sembrare uno schermo di
+   allora. Ha un solo peso, come tutti i caratteri nati dentro una ROM. */
+const retro = VT323({
+  variable: "--font-retro-stack",
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
@@ -50,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       // Lascia a Next.js la gestione dello scroll fra le navigazioni, tenendo
       // morbido lo scorrimento sulle ancore interne (richiesto da Next.js 16).
       data-scroll-behavior="smooth"
-      className={`${sans.variable} ${mono.variable} scroll-smooth antialiased`}
+      className={`${sans.variable} ${mono.variable} ${retro.variable} scroll-smooth antialiased`}
     >
       <body className="flex min-h-svh flex-col font-sans">
         {children}

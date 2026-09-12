@@ -52,6 +52,80 @@
 
   --font-sans: var(--font-sans-stack);
   --font-mono: var(--font-mono-stack);
+  --font-retro: var(--font-retro-stack), ui-monospace, monospace;
+
+  --animate-cursore: cursore 1.06s step-end infinite;
+}
+
+/* Il cursore a blocco lampeggia solo a scrittura finita: fermo, mentre le
+   lettere arrivano, non copre quella che sta per comparire. `step-end` lo
+   spegne di netto, come un fosforo pilotato, senza dissolvenze. */
+@keyframes cursore {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/*
+  Lo slider della densità. Il controllo di serie è diverso in ogni browser e
+  in nessuno somiglia al resto della pagina: qui la traccia diventa un filo
+  sottile e il cursore una pastiglia viola. Le due famiglie di selettori non
+  si possono unire — se un browser non capisce una riga della regola scarta
+  tutto il blocco — quindi WebKit e Firefox stanno separati per necessità.
+*/
+.plasma-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 1.25rem;
+  background: transparent;
+  cursor: pointer;
+}
+
+.plasma-range:focus-visible {
+  outline: 2px solid var(--viola);
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+.plasma-range::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+.plasma-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-top: -0.36rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--viola);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--viola) 22%, transparent);
+  transition: box-shadow 0.15s ease;
+}
+
+.plasma-range:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--viola) 30%, transparent);
+}
+
+.plasma-range::-moz-range-track {
+  height: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+.plasma-range::-moz-range-thumb {
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--viola);
+}
+
+.plasma-range:disabled {
+  cursor: default;
 }
 
 /* L'intestazione è alta uno schermo e non c'è una barra fissa in cima, quindi

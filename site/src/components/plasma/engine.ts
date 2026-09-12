@@ -160,6 +160,10 @@ export type PlasmaHandle = {
   resume: () => void;
   redraw: () => void;
   destroy: () => void;
+  /** Cambia il corpo della cella rigenerando l'atlante. Sta qui e non nello
+   *  state perché l'atlante è una texture: scrivere il numero non basta. */
+  setCellW: (v: number) => void;
+  setAscii: (v: boolean) => void;
 };
 
 /**
@@ -485,6 +489,19 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
       raf = requestAnimationFrame(frame);
     },
     redraw: draw,
+    setCellW(v: number) {
+      const n = Math.min(28, Math.max(4, Math.round(v)));
+      if (n === state.cellW) return;
+      state.cellW = n;
+      atlasFor = 0;
+      rebuildAtlas();
+      if (!alive) draw(); /* da fermo il quadro va ridisegnato a mano */
+    },
+    setAscii(v: boolean) {
+      if (v === state.ascii) return;
+      state.ascii = v;
+      if (!alive) draw();
+    },
     destroy() {
       api.stop();
       window.removeEventListener("resize", resize);
