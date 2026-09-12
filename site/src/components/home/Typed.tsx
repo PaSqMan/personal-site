@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
+
+import { useMotoRidotto } from "@/lib/motoRidotto";
 
 /**
  * Scrive le righe una dopo l'altra, come una tastiera, e lascia in fondo il
@@ -20,24 +22,6 @@ import { useEffect, useState, useSyncExternalStore } from "react";
  *    suona finta: qui ogni lettera ha una pausa di base con una variazione
  *    casuale, più lunga dopo uno spazio.
  */
-
-/**
- * Legge `prefers-reduced-motion` senza passare per uno stato aggiornato in un
- * effetto: `useSyncExternalStore` è fatto per le sorgenti esterne al React, dà
- * un valore anche durante il prerender sul server (dove `matchMedia` non
- * esiste) e si riaggiorna se l'impostazione cambia mentre la pagina è aperta.
- */
-function useMotoRidotto(): boolean {
-  return useSyncExternalStore(
-    (avvisa) => {
-      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-      mq.addEventListener("change", avvisa);
-      return () => mq.removeEventListener("change", avvisa);
-    },
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    () => false,
-  );
-}
 
 export type RigaTesto = {
   testo: string;

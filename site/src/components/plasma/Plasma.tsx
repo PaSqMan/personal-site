@@ -24,6 +24,7 @@ import { startPlasma, type PlasmaHandle, type PlasmaStat } from "./engine";
 export function Plasma({
   variant = "background",
   ascii,
+  color,
   cellW,
   scale,
   className = "",
@@ -31,6 +32,7 @@ export function Plasma({
 }: {
   variant?: "background" | "full";
   ascii?: boolean;
+  color?: boolean;
   cellW?: number;
   scale?: number;
   className?: string;
@@ -50,7 +52,7 @@ export function Plasma({
 
   /* I valori iniziali entrano nel motore alla creazione; dopo, li muovono gli
      effetti qui sotto. Un ref evita di rimetterli fra le dipendenze. */
-  const primo = useRef({ ascii, cellW, scale });
+  const primo = useRef({ ascii, color, cellW, scale });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,6 +68,7 @@ export function Plasma({
         cellW: iniziale.cellW ?? (variant === "background" ? 11 : 9),
         scale: iniziale.scale ?? (variant === "background" ? 2.9 : 2.6),
         ascii: iniziale.ascii ?? true,
+        color: iniziale.color ?? true,
         keys: variant === "full",
         wheel: variant === "full",
         pointerTarget: variant === "background" ? host : null,
@@ -110,6 +113,10 @@ export function Plasma({
   useEffect(() => {
     if (ascii !== undefined) handleRef.current?.setAscii(ascii);
   }, [ascii]);
+
+  useEffect(() => {
+    if (color !== undefined) handleRef.current?.setColor(color);
+  }, [color]);
 
   return <canvas ref={canvasRef} aria-hidden="true" hidden={assente} className={className} />;
 }

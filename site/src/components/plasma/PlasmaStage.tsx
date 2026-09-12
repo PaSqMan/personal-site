@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { useMotoRidotto } from "@/lib/motoRidotto";
 
 import { Plasma } from "./Plasma";
 import type { PlasmaStat } from "./engine";
@@ -11,20 +13,66 @@ import type { PlasmaStat } from "./engine";
  * Lo stato vive qui, non dentro il canvas: i comandi devono poter stare
  * altrove nella pagina e comunque muovere il campo.
  *
- * La densità è espressa dal corpo della cella in pixel, ma lo slider non
- * chiede quello a chi guarda: scorrendo verso destra i caratteri diventano più
- * piccoli e quindi più numerosi, che è il modo in cui uno se lo aspetta. Perciò
- * il valore mostrato è il numero di colonne, e il cursore lavora su una scala
- * rovesciata rispetto al corpo.
+ * I comandi non hanno un riquadro. Un pannello con bordo e fondo sfocato si
+ * annuncia come un pezzo di interfaccia e si mette in concorrenza col nome, che
+ * è la cosa da guardare; qui restano segni tipografici appoggiati sul campo —
+ * tre parole, un filo e un numero. Non spariscono, ma stanno in grigio tenue e
+ * diventano pieni quando ci si passa sopra o li si raggiunge da tastiera: la
+ * gerarchia la fa il contrasto, non una scatola.
+ *
+ * Il contrasto passa dai colori, non dall'opacità: `--faint` sul fondo dà
+ * 4.96:1, appena sopra la soglia AA, e velarlo al 55% lo porterebbe sotto.
  */
 
 const CELLA_MIN = 5; /* caratteri minuscoli, griglia fittissima */
 const CELLA_MAX = 22; /* caratteri grossi, si contano a occhio */
 
+/**
+ * Il giro della modalità automatica: venti secondi, di cui l'ottanta per cento
+ * a colori e il resto in bianco e nero.
+ *
+ * La durata non è casuale. Sotto i dieci secondi il cambio diventa un tic che
+ * tira l'occhio via dal testo mentre lo si legge; molto sopra i venti, chi
+ * arriva e riparte non vede mai il secondo stato e la modalità non si capisce.
+ * Venti secondi fanno sì che il passaggio capiti una volta nella visita tipica,
+ * come una cosa che succede, non come un'animazione che gira.
+ */
+const CICLO_MS = 20_000;
+const QUOTA_COLORE = 0.8;
+const COLORE_MS = CICLO_MS * QUOTA_COLORE;
+const MONO_MS = CICLO_MS - COLORE_MS;
+
+type Modo = "auto" | "ascii" | "pixels";
+
 export function PlasmaStage() {
-  const [ascii, setAscii] = useState(true);
+  const [modo, setModo] = useState<Modo>("auto");
+  const [coloreAuto, setColoreAuto] = useState(true);
+  const [coloreManuale, setColoreManuale] = useState(true);
   const [cellW, setCellW] = useState(11);
   const grigliaRef = useRef<HTMLSpanElement>(null);
+  const motoRidotto = useMotoRidotto();
+
+  /*  L'alternanza della modalità automatica.
+   *
+   *  Il primo stato non si imposta qui: è già quello iniziale (a colori), e il
+   *  timer programma solo il passaggio successivo. Scriverlo nell'effetto
+   *  vorrebbe dire un secondo render a ogni ingresso in modalità automatica,
+   *  per arrivare al valore che c'era già.
+   *
+   *  Chi ha chiesto meno movimento resta a colori, fermo: un cambio ogni venti
+   *  secondi è poco, ma è comunque un cambiamento che non ha chiesto.
+   */
+  useEffect(() => {
+    if (modo !== "auto" || motoRidotto) return;
+
+    let timer: number | undefined;
+    const passo = (colore: boolean) => {
+      setColoreAuto(colore);
+      timer = window.setTimeout(() => passo(!colore), colore ? COLORE_MS : MONO_MS);
+    };
+    timer = window.setTimeout(() => passo(false), COLORE_MS);
+    return () => window.clearTimeout(timer);
+  }, [modo, motoRidotto]);
 
   /* Il conteggio delle celle arriva dal ciclo di disegno quattro volte al
      secondo: scriverlo nel nodo costa un'assegnazione, passarlo in stato
@@ -34,6 +82,11 @@ export function PlasmaStage() {
     if (node) node.textContent = s.ascii ? `${s.cols}×${s.rows}` : `${s.width}×${s.height}`;
   }, []);
 
+  const ascii = modo !== "pixels";
+  /* Il bianco e nero riguarda i caratteri: senza glifi non è una scelta di
+     stile, è un plasma grigio. In `pixels` il colore resta sempre acceso. */
+  const colore = modo === "pixels" ? true : modo === "auto" ? coloreAuto : coloreManuale;
+
   /* rovesciata: cursore a destra = celle piccole = più caratteri */
   const valoreSlider = CELLA_MIN + CELLA_MAX - cellW;
 
@@ -42,6 +95,7 @@ export function PlasmaStage() {
       <Plasma
         variant="background"
         ascii={ascii}
+        color={colore}
         cellW={cellW}
         onStat={onStat}
         className="absolute inset-0 -z-20 h-full w-full opacity-90 [touch-action:pan-y]"
@@ -70,63 +124,90 @@ export function PlasmaStage() {
         }`}
       />
 
-      {/* i comandi: in basso a destra sul desktop, in fondo al centro sul
-          telefono, dove il pollice arriva senza spostare la mano */}
-      <div className="absolute inset-x-4 bottom-4 z-10 sm:inset-x-auto sm:bottom-6 sm:right-6">
-        <div className="flex flex-col gap-3 rounded-2xl border border-hairline bg-surface/70 p-3 backdrop-blur-md sm:w-64">
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-faint">
-              Sfondo
-            </span>
-            <span ref={grigliaRef} className="font-mono text-[0.7rem] tabular-nums text-faint">
-              —
-            </span>
-          </div>
+      {/* `group` fa salire di tono tutto l'insieme quando il puntatore entra in
+          zona, non il singolo pezzo toccato: così i comandi si accendono come
+          un gruppo e restano leggibili mentre li si usa. */}
+      <div className="group absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 font-mono text-[0.68rem] uppercase tracking-[0.18em] sm:inset-x-auto sm:bottom-8 sm:right-8 sm:flex-nowrap sm:justify-end">
+        <Gruppo>
+          <Voce attiva={modo === "auto"} onClick={() => setModo("auto")}>
+            Auto
+          </Voce>
+          <Barra />
+          <Voce attiva={modo === "ascii"} onClick={() => setModo("ascii")}>
+            Ascii
+          </Voce>
+          <Barra />
+          <Voce attiva={modo === "pixels"} onClick={() => setModo("pixels")}>
+            Pixels
+          </Voce>
+        </Gruppo>
 
-          {/* Due stati, quindi due pulsanti e non un menù: si vede da subito
-              cosa si può scegliere. `aria-pressed` dice a chi non vede quale
-              dei due è attivo. */}
-          <div className="flex gap-1 rounded-full border border-hairline p-1">
-            <ModoBtn attivo={ascii} onClick={() => setAscii(true)}>
-              Caratteri
-            </ModoBtn>
-            <ModoBtn attivo={!ascii} onClick={() => setAscii(false)}>
-              Pixel
-            </ModoBtn>
-          </div>
+        {/* Compare solo a caratteri scelti a mano: in automatico lo decide il
+            ciclo, e un comando che non comanda niente è peggio di un comando
+            assente. */}
+        {modo === "ascii" && (
+          <Gruppo>
+            <Voce attiva={coloreManuale} onClick={() => setColoreManuale(true)}>
+              Color
+            </Voce>
+            <Barra />
+            <Voce attiva={!coloreManuale} onClick={() => setColoreManuale(false)}>
+              Mono
+            </Voce>
+          </Gruppo>
+        )}
 
-          <label
-            className={`flex flex-col gap-1.5 transition-opacity ${
-              ascii ? "opacity-100" : "pointer-events-none opacity-40"
-            }`}
-          >
-            <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-faint">
-              Densità
-            </span>
-            <input
-              type="range"
-              min={CELLA_MIN}
-              max={CELLA_MAX}
-              step={1}
-              value={valoreSlider}
-              disabled={!ascii}
-              aria-label="Densità dei caratteri dello sfondo"
-              onChange={(e) => setCellW(CELLA_MIN + CELLA_MAX - Number(e.target.value))}
-              className="plasma-range"
-            />
-          </label>
-        </div>
+        <label
+          className={`flex items-center gap-2.5 transition-opacity duration-300 ${
+            ascii ? "" : "pointer-events-none opacity-30"
+          }`}
+        >
+          <span className="text-faint transition-colors group-hover:text-dim">Density</span>
+          <input
+            type="range"
+            min={CELLA_MIN}
+            max={CELLA_MAX}
+            step={1}
+            value={valoreSlider}
+            disabled={!ascii}
+            aria-label="Background character density"
+            onChange={(e) => setCellW(CELLA_MIN + CELLA_MAX - Number(e.target.value))}
+            className="plasma-range w-24 sm:w-28"
+          />
+        </label>
+
+        {/* Il conteggio è un promemoria, non un'informazione da cercare: resta
+            tenue e su schermi stretti esce di scena, dove lo spazio serve ai
+            comandi veri. */}
+        <span
+          ref={grigliaRef}
+          className="hidden tabular-nums normal-case tracking-normal text-faint/70 transition-colors group-hover:text-faint sm:inline"
+        >
+          —
+        </span>
       </div>
     </>
   );
 }
 
-function ModoBtn({
-  attivo,
+function Gruppo({ children }: { children: React.ReactNode }) {
+  return <div className="flex items-baseline gap-2.5">{children}</div>;
+}
+
+function Barra() {
+  return (
+    <span aria-hidden="true" className="text-faint/40">
+      /
+    </span>
+  );
+}
+
+function Voce({
+  attiva,
   onClick,
   children,
 }: {
-  attivo: boolean;
+  attiva: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -134,9 +215,11 @@ function ModoBtn({
     <button
       type="button"
       onClick={onClick}
-      aria-pressed={attivo}
-      className={`flex-1 rounded-full px-3 py-1.5 font-mono text-xs transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-viola ${
-        attivo ? "bg-viola font-semibold text-on-accent" : "text-dim hover:text-ink"
+      aria-pressed={attiva}
+      className={`relative pb-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-viola ${
+        attiva
+          ? "text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-viola after:content-['']"
+          : "text-faint hover:text-dim"
       }`}
     >
       {children}

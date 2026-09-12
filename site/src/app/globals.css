@@ -50,7 +50,7 @@
   --color-magenta: var(--magenta);
   --color-on-accent: var(--on-accent);
 
-  --font-sans: var(--font-sans-stack);
+  --font-sans: var(--font-mono-stack);
   --font-mono: var(--font-mono-stack);
   --font-retro: var(--font-retro-stack), ui-monospace, monospace;
 

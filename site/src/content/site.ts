@@ -24,11 +24,10 @@ export const site = {
     /* Serve a metadataBase e alla sitemap. Se il sito passa a dominio proprio,
        o a un repository <utente>.github.io, qui va l'indirizzo nuovo. */
     url: "https://pasqman.github.io/personal-site",
-    titolo: "Pasquale Di Gennaro — software e IA",
+    titolo: "Pasquale Di Gennaro — Software & AI",
     /* È quello che si legge nei risultati di ricerca e nelle condivisioni:
-       tiene la stessa frase della pagina, tradotta, senza aggiungere niente
-       che in pagina non ci sia. */
-    descrizione:
-      "Pasquale Di Gennaro (PaSqMan): sviluppo software e sistemi di intelligenza artificiale.",
+       la stessa frase della pagina, senza aggiungere niente che in pagina non
+       ci sia. */
+    descrizione: "Pasquale Di Gennaro (PaSqMan): building software and artificial intelligence systems.",
   },
 };

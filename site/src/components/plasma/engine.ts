@@ -164,6 +164,7 @@ export type PlasmaHandle = {
    *  state perché l'atlante è una texture: scrivere il numero non basta. */
   setCellW: (v: number) => void;
   setAscii: (v: boolean) => void;
+  setColor: (v: boolean) => void;
 };
 
 /**
@@ -500,6 +501,11 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
     setAscii(v: boolean) {
       if (v === state.ascii) return;
       state.ascii = v;
+      if (!alive) draw();
+    },
+    setColor(v: boolean) {
+      if (v === state.color) return;
+      state.color = v;
       if (!alive) draw();
     },
     destroy() {

@@ -1,18 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, VT323 } from "next/font/google";
+import { JetBrains_Mono, VT323 } from "next/font/google";
 
 import { site } from "@/content/site";
 
 import "./globals.css";
 
 /* `next/font` scarica i file alla build e li serve dal sito: nessuna richiesta
-   a Google quando la pagina si apre, quindi niente terze parti da dichiarare. */
-const sans = Inter({
-  variable: "--font-sans-stack",
-  subsets: ["latin"],
-  display: "swap",
-});
-
+   a Google quando la pagina si apre, quindi niente terze parti da dichiarare.
+   Due caratteri e non tre: il monospace porta tutto il testo, VT323 fa
+   l'insegna. Un sans qui dentro non lo leggeva più nessuno. */
 const mono = JetBrains_Mono({
   variable: "--font-mono-stack",
   subsets: ["latin"],
@@ -39,7 +35,7 @@ export const metadata: Metadata = {
   authors: [{ name: site.persona.nome, url: site.persona.github }],
   openGraph: {
     type: "website",
-    locale: "it_IT",
+    locale: "en",
     siteName: site.persona.nome,
     title: site.seo.titolo,
     description: site.seo.descrizione,
@@ -56,13 +52,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="it"
+      lang="en"
       // Lascia a Next.js la gestione dello scroll fra le navigazioni, tenendo
       // morbido lo scorrimento sulle ancore interne (richiesto da Next.js 16).
       data-scroll-behavior="smooth"
-      className={`${sans.variable} ${mono.variable} ${retro.variable} scroll-smooth antialiased`}
+      className={`${mono.variable} ${retro.variable} scroll-smooth antialiased`}
     >
-      <body className="flex min-h-svh flex-col font-sans">
+      <body className="flex min-h-svh flex-col font-mono">
         {children}
       </body>
     </html>

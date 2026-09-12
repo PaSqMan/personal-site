@@ -41,15 +41,20 @@ export function Hero() {
           />
         </h1>
 
-        {/* La frase è in inglese dentro una pagina in italiano: senza `lang` un
-            lettore di schermo la pronuncerebbe con le regole sbagliate. */}
-        <p lang="en" className="mt-7 max-w-[32em] text-[1.0625rem] text-dim [text-shadow:0_1px_14px_rgba(7,6,12,0.9)] sm:text-xl">
-          Building Software and Artificial Intelligence Systems.
+        {/* Monospace, come tutto il resto della pagina: il sans era l'unico
+            carattere estraneo qui dentro, fra un nome da terminale e comandi da
+            terminale. In compenso il monospace è più larga a pari corpo, quindi
+            la misura scende a 20em e il corpo di un gradino.
+            Le due parole che contano stanno in bianco pieno e in semibold, il
+            resto in grigio: l'occhio le prende prima di leggere. */}
+        <p className="mt-7 max-w-[20em] text-balance font-mono text-lg leading-[1.5] tracking-tight text-dim [text-shadow:0_1px_16px_rgba(7,6,12,0.92)] sm:text-2xl sm:leading-[1.45]">
+          Building <strong className="font-semibold text-ink">Software</strong> and{" "}
+          <strong className="font-semibold text-ink">Artificial Intelligence</strong> Systems.
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-2.5">
+        <div className="mt-9 flex flex-wrap gap-2.5">
           <Button href={`mailto:${persona.email}`} tone="primary">
-            Scrivimi
+            Email me
           </Button>
           <Button href={persona.github}>GitHub</Button>
         </div>
