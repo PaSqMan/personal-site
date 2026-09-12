@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Il carattere più denso della rampa di fx_libero_core.c, sul fondo del
+       sito: l'icona dice da dove viene tutto il resto. -->
+  <rect width="32" height="32" rx="7" fill="#0d0b16"/>
+  <text x="16" y="22" font-family="monospace" font-size="20" font-weight="bold"
+        text-anchor="middle" fill="#c8a6ff">@</text>
+</svg>

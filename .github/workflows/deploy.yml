@@ -1,0 +1,75 @@
+name: Deploy su GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Permette di rilanciare la pubblicazione a mano dalla scheda Actions.
+  workflow_dispatch:
+
+# Permessi minimi richiesti da GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una pubblicazione alla volta; se ne parte una nuova, quella in coda decade.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Il sito è una sottocartella del repository: qui c'è anche il codice C
+    # degli effetti, che non entra nella build.
+    defaults:
+      run:
+        working-directory: site
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Installa le dipendenze
+        run: npm ci
+
+      - name: Controlla tipi e regole
+        # Se il sito non compila o il lint trova un errore, meglio saperlo qui
+        # che dal vivo: `next build` fa già i tipi, eslint il resto.
+        run: npm run lint
+
+      - name: Costruisci il sito statico
+        # NEXT_PUBLIC_BASE_PATH prefissa i percorsi assoluti con il nome del
+        # repository: senza, su un sito "di progetto" GitHub Pages il CSS, il
+        # JavaScript e i font restituiscono 404.
+        #
+        # Da svuotare (NEXT_PUBLIC_BASE_PATH: "") il giorno che il sito andrà
+        # su dominio proprio o su un repository chiamato <utente>.github.io.
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: Disattiva Jekyll
+        # GitHub Pages passa tutto per Jekyll, che ignora le cartelle il cui
+        # nome inizia con "_". Senza questo file l'intera cartella `_next`
+        # verrebbe scartata e il sito uscirebbe senza stili né JavaScript.
+        run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

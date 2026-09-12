@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/*
+  ── Palette ──────────────────────────────────────────────────────────────
+
+  I colori non sono scelti a occhio: sono presi dal plasma che gira
+  nell'intestazione. La sua palette a coseni passa per i viola, i ciano e i
+  magenta, quindi il sito usa quelli — così lo sfondo non sembra un ospite.
+
+  Fondo quasi nero e non nero pieno (#07060c contro #000): un nero assoluto
+  fa risaltare troppo i bordi dei riquadri e rende più stancante la lettura
+  lunga; qualche punto di blu nel fondo tiene insieme tutto.
+
+  Rapporti di contrasto misurati sul fondo (#07060c), non stimati:
+
+    --ink    #edeaf6   17.01:1   testo corrente
+    --dim    #a29cba    7.69:1   testo secondario, paragrafi lunghi
+    --faint  #807a99    4.96:1   metadati e note, il minimo che passa AA
+    --viola  #c8a6ff    9.95:1   occhielli, accenti, bordi attivi
+    --ciano  #7ce7d8   13.72:1   titoli di sezione
+
+  Il valore di --faint è scelto proprio lì: #6f6987, che sembra più elegante,
+  dà 3.89:1 e sarebbe sotto la soglia AA per il testo piccolo. Meglio un
+  grigio appena più chiaro che una nota illeggibile.
+
+  Nero su viola pieno (i pulsanti principali) dà 9.80:1.
+*/
+:root {
+  --background: #07060c;
+  --surface: #0d0b16;
+  --ink: #edeaf6;
+  --dim: #a29cba;
+  --faint: #807a99;
+  --hairline: rgba(237, 234, 246, 0.14);
+  --viola: #c8a6ff;
+  --ciano: #7ce7d8;
+  --magenta: #ff7ac6;
+  --on-accent: #0a0812;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-dim: var(--dim);
+  --color-faint: var(--faint);
+  --color-hairline: var(--hairline);
+  --color-viola: var(--viola);
+  --color-ciano: var(--ciano);
+  --color-magenta: var(--magenta);
+  --color-on-accent: var(--on-accent);
+
+  --font-sans: var(--font-sans-stack);
+  --font-mono: var(--font-mono-stack);
+}
+
+/* L'intestazione è alta uno schermo e non c'è una barra fissa in cima, quindi
+   alle ancore basta un margine di cortesia. */
+html {
+  scroll-padding-top: 2rem;
+  background-color: var(--background);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--viola);
+  color: var(--on-accent);
+}
+
+/*
+  ── Comparsa al primo ingresso ───────────────────────────────────────────
+
+  La transizione vive qui e il componente Reveal accende solo `data-visible`:
+  così il JavaScript non tocca mai lo stile, e chi ha chiesto meno movimento
+  vede il contenuto già al suo posto invece di un elemento che non arriva mai.
+*/
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+[data-reveal][data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
