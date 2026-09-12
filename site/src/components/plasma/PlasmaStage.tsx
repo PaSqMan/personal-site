@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { useMotoRidotto } from "@/lib/motoRidotto";
 
 import { Plasma } from "./Plasma";
-import type { PlasmaStat } from "./engine";
 
 /**
  * Il plasma di sfondo e il suo unico comando.
@@ -40,14 +39,13 @@ const CELLA_MAX = 22; /* caratteri grossi, si contano a occhio */
 const MEZZO_CICLO_MS = 10_000;
 
 /**
- * `children` finisce nella barra in basso, dopo lo slider: la barra è il posto
- * dei comandi di questa pagina, e chi ne ha uno lo mette lì invece di aprirsi
- * un angolo per conto proprio. Il player della musica arriva da qui.
+ * `children` finisce nella colonna in basso, sotto lo slider: quella colonna è
+ * il posto dei comandi di questa pagina, e chi ne ha uno lo mette lì invece di
+ * aprirsi un angolo per conto proprio. Il player della musica arriva da qui.
  */
 export function PlasmaStage({ children }: { children?: ReactNode }) {
   const [colore, setColore] = useState(true);
   const [cellW, setCellW] = useState(11);
-  const grigliaRef = useRef<HTMLSpanElement>(null);
   const motoRidotto = useMotoRidotto();
 
   /*  Il primo stato non si imposta qui: è già quello iniziale (a colori), e il
@@ -70,14 +68,6 @@ export function PlasmaStage({ children }: { children?: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [motoRidotto]);
 
-  /* Il conteggio delle celle arriva dal ciclo di disegno quattro volte al
-     secondo: scriverlo nel nodo costa un'assegnazione, passarlo in stato
-     costerebbe un render dell'intera intestazione. */
-  const onStat = useCallback((s: PlasmaStat) => {
-    const node = grigliaRef.current;
-    if (node) node.textContent = `${s.cols}×${s.rows}`;
-  }, []);
-
   /* rovesciata: cursore a destra = celle piccole = più caratteri */
   const valoreSlider = CELLA_MIN + CELLA_MAX - cellW;
 
@@ -87,7 +77,6 @@ export function PlasmaStage({ children }: { children?: ReactNode }) {
         variant="background"
         color={colore}
         cellW={cellW}
-        onStat={onStat}
         className="absolute inset-0 -z-20 h-full w-full opacity-90 [touch-action:pan-y]"
       />
 
@@ -104,7 +93,7 @@ export function PlasmaStage({ children }: { children?: ReactNode }) {
 
       {/* `group` fa salire di tono l'insieme quando il puntatore entra in zona,
           non il singolo pezzo toccato. */}
-      <div className="group absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-10 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 font-mono text-[0.68rem] uppercase tracking-[0.18em] sm:inset-x-auto sm:bottom-7 sm:right-8 sm:flex-nowrap sm:justify-end">
+      <div className="group absolute inset-x-6 bottom-[max(1.5rem,env(safe-area-inset-bottom))] z-10 flex flex-col items-center gap-3 font-mono text-[0.68rem] uppercase tracking-[0.18em] sm:inset-x-auto sm:bottom-7 sm:right-8 sm:items-end">
         <label className="flex items-center gap-2.5">
           <span className="text-faint transition-colors group-hover:text-dim">Density</span>
           <input
@@ -118,16 +107,6 @@ export function PlasmaStage({ children }: { children?: ReactNode }) {
             className="plasma-range w-28 sm:w-32"
           />
         </label>
-
-        {/* Il conteggio è un promemoria, non un'informazione da cercare: resta
-            tenue e su schermi stretti esce di scena, dove lo spazio serve al
-            comando vero. */}
-        <span
-          ref={grigliaRef}
-          className="hidden tabular-nums normal-case tracking-normal text-faint/70 transition-colors group-hover:text-faint sm:inline"
-        >
-          —
-        </span>
 
         {children}
       </div>
