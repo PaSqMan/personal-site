@@ -1,0 +1,9 @@
+# prodotti della compilazione: si rifanno con build.bat
+*.exe
+*.o
+*.obj
+
+# copie di sicurezza lasciate dagli strumenti
+*.bak
+*.orig
+_new.c
