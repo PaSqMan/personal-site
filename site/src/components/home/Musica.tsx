@@ -192,15 +192,28 @@ export function Musica() {
   }, []);
 
   return (
-    <div className="absolute bottom-[max(5rem,calc(env(safe-area-inset-bottom)+3.5rem))] left-1/2 z-10 w-[min(22rem,calc(100vw-3rem))] -translate-x-1/2 sm:bottom-8 sm:left-8 sm:translate-x-0">
-      {/* Il player di Spotify ha il suo stile, verde e arrotondato, che con
-          questa pagina non c'entra niente: invece di combatterlo lo si tiene
-          piccolo e in un angolo, come una citazione. */}
-      <div ref={contenitore} />
+    /*  Sta sopra la riga dei comandi e dalla stessa parte: i settaggi di questa
+     *  pagina vivono nell'angolo in basso a destra, e una cosa che si comanda
+     *  va dove si comandano le altre. Su schermo stretto i comandi stanno in
+     *  fondo al centro, e il player li segue lì.
+     */
+    <div className="absolute bottom-[max(5.25rem,calc(env(safe-area-inset-bottom)+3.75rem))] left-1/2 z-10 w-[min(22rem,calc(100vw-3rem))] -translate-x-1/2 sm:bottom-[4.75rem] sm:left-auto sm:right-8 sm:translate-x-0">
+      {/*  Il ritaglio va su un involucro, non sul nodo che passo all'API:
+       *  `createController` **sostituisce** quel nodo con il suo iframe, e con
+       *  esso spariscono le classi che gli avessi messo.
+       *
+       *  Serve perché l'iframe ha un fondo bianco di serie, e il player che ci
+       *  sta dentro ha gli angoli arrotondati: fuori dal raggio restavano
+       *  quattro spicchi chiari. Un `overflow-hidden` con lo stesso raggio del
+       *  player li taglia via.
+       */}
+      <div className="overflow-hidden rounded-xl">
+        <div ref={contenitore} />
+      </div>
       <button
         type="button"
         onClick={alterna}
-        className="mt-2 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-faint transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-viola"
+        className="mt-2 block w-full text-center font-mono text-[0.68rem] uppercase tracking-[0.18em] text-faint transition-colors hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-viola sm:text-right"
       >
         <span aria-hidden="true" className="text-viola">
           ♪
