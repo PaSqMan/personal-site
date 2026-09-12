@@ -321,13 +321,23 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
   }
 
   /* -------------------------------------------------------------- comandi */
+  /*  Quanto il puntatore sposta il centro del campo.
+   *
+   *  A uno il centro seguiva il puntatore da bordo a bordo, e il risultato era
+   *  che muovendo il mouse per arrivare a un pulsante si trascinava dietro
+   *  tutto lo sfondo: la pagina sembrava reagire a ogni gesto, anche a quelli
+   *  che non la riguardavano. Il quaranta per cento lascia il tocco — si vede
+   *  che lo sfondo sa dove sei — senza che diventi un'altalena.
+   */
+  const RISPOSTA = 0.4;
+
   function pointTo(clientX: number, clientY: number) {
     const r = cv.getBoundingClientRect();
     const asp = r.width / Math.max(1, r.height);
     const nx = (((2 * (clientX - r.left)) / Math.max(1, r.width)) - 1) * asp;
     const ny = 1 - (2 * (clientY - r.top)) / Math.max(1, r.height);
-    state.tx = nx * state.scale;
-    state.ty = ny * state.scale;
+    state.tx = nx * state.scale * RISPOSTA;
+    state.ty = ny * state.scale * RISPOSTA;
     state.touched = true;
   }
 
@@ -338,12 +348,16 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
   const onMove = (e: PointerEvent) => {
     const now = performance.now();
     pointTo(e.clientX, e.clientY);
-    /* velocità del puntatore in pixel al secondo -> velocità del campo.
-       Il tetto evita che uno scatto secco mandi il tempo alle stelle. */
+    /*  Velocità del puntatore -> velocità del campo, ma con la mano molto
+     *  leggera. Prima un gesto rapido portava il tempo a più del triplo, e il
+     *  campo partiva per conto suo proprio mentre si stava leggendo. Adesso il
+     *  massimo è un trenta per cento in più: si avverte come una reazione,
+     *  non come uno strappo.
+     */
     if (lastMove) {
       const dt = Math.max(1, now - lastMove);
       const v = (Math.hypot(e.clientX - lastX, e.clientY - lastY) / dt) * 1000;
-      state.speedTarget = 0.75 + Math.min(2.4, v / 900);
+      state.speedTarget = 0.95 + Math.min(0.3, v / 4200);
     }
     lastMove = now;
     lastX = e.clientX;
@@ -352,7 +366,9 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
   };
   const onDown = (e: PointerEvent) => {
     pointTo(e.clientX, e.clientY);
-    state.ring = 1; /* l'onda parte piena e poi svanisce */
+    /* l'onda si sente ma non squarcia il campo: a uno il tocco apriva un
+       cratere, e su un telefono ogni tocco è anche uno scroll mancato */
+    state.ring = 0.45;
     o.onPoint?.();
   };
   const onLeave = () => {
@@ -501,7 +517,10 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
 
     /* inseguimenti morbidi, col coefficiente corretto per il delta: la
        reattività non cambia col refresh dello schermo */
-    const k = 1 - Math.exp(-smooth * 7.0);
+    /* Inseguimento più lento di prima (era 7): il centro arriva con un ritardo
+       percepibile, ed è quel ritardo a far leggere il movimento come un'onda
+       invece che come uno strappo attaccato al puntatore. */
+    const k = 1 - Math.exp(-smooth * 3.2);
     if (!state.touched) {
       /* il puntatore è uscito: il centro torna a casa. Il coefficiente passa
          per l'esponenziale del delta, non è un fattore per quadro: un "x0.96 a
