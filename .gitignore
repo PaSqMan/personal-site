@@ -1,9 +1,15 @@
-# prodotti della compilazione: si rifanno con build.bat
+# Questo repository contiene solo il sito: i prodotti della sua build stanno
+# in site/.gitignore. Qui restano i residui che gli strumenti lasciano in
+# giro, che non appartengono a nessuna cartella in particolare.
+*.bak
+*.orig
+*.log
+
+# eseguibili e oggetti: non ne nascono in questo repository, ma se qualcuno
+# compila qualcosa nella cartella non deve finire in un commit
 *.exe
 *.o
 *.obj
 
-# copie di sicurezza lasciate dagli strumenti
-*.bak
-*.orig
-_new.c
+.DS_Store
+Thumbs.db
