@@ -71,6 +71,10 @@ export function Plasma({
         color: iniziale.color ?? true,
         keys: variant === "full",
         wheel: variant === "full",
+        /* l'inclinazione del telefono serve allo sfondo, che non ha altri modi
+           di essere toccato su un telefono: nella demo a schermo pieno ci sono
+           già dita, tastiera e rotella */
+        gyro: variant === "background",
         pointerTarget: variant === "background" ? host : null,
         onStat: (s) => statRef.current?.(s),
       });
@@ -83,6 +87,16 @@ export function Plasma({
       return;
     }
     handleRef.current = handle;
+
+    /* Gancio di diagnostica, solo con ?debug nell'indirizzo: da lì si legge e
+       si muove lo stato del campo dalla console del browser
+       (plasma.state.scale = 6, plasma.setCellW(7), …). Dietro una query così
+       non finisce nella pagina di tutti i giorni, e serve a provare da fuori
+       cose che altrimenti si potrebbero solo guardare a occhio, come
+       l'inclinazione del telefono. */
+    if (new URLSearchParams(window.location.search).has("debug")) {
+      (window as unknown as { plasma?: PlasmaHandle }).plasma = handle;
+    }
 
     /* l'intestazione fuori dallo schermo non va animata */
     let io: IntersectionObserver | null = null;

@@ -146,6 +146,8 @@ export type PlasmaOptions = {
   pointer?: boolean;
   /** da spegnere quando la pagina scorre: la rotella è sua */
   wheel?: boolean;
+  /** segue l'inclinazione del telefono, dove c'è un giroscopio */
+  gyro?: boolean;
   /** di norma il canvas; in uno sfondo conviene il contenitore, così il campo
    *  segue il puntatore anche quando passa sopra il testo */
   pointerTarget?: HTMLElement | null;
@@ -199,6 +201,7 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
     keys: false,
     pointer: true,
     wheel: true,
+    gyro: false,
     pointerTarget: null,
     ...options,
   };
@@ -359,6 +362,58 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
     e.preventDefault();
     state.scale = Math.min(9, Math.max(0.7, state.scale * Math.exp(-e.deltaY * 0.0012)));
   };
+  /*  L'inclinazione del telefono muove il centro del campo.
+   *
+   *  Due cose la rendono usabile invece che solo dimostrabile:
+   *
+   *  1. **Lo zero è dove sei.** Nessuno tiene il telefono perfettamente
+   *     piatto: il primo evento fissa la posizione di partenza e da lì si
+   *     misura lo scostamento, così il campo parte centrato qualunque sia la
+   *     postura della mano.
+   *  2. **Il fondo scala corto.** Venticinque gradi bastano per arrivare al
+   *     bordo: più di così si dovrebbe girare il telefono per vedere l'effetto,
+   *     e a quel punto non si vede più lo schermo.
+   *
+   *  Il valore finisce negli stessi tx/ty del puntatore, quindi lo raggiunge
+   *  lo stesso inseguimento morbido e non c'è un secondo percorso da tarare.
+   */
+  const GRADI_PIENI = 25;
+  let zeroBeta: number | null = null;
+  let zeroGamma: number | null = null;
+
+  const onOrient = (e: DeviceOrientationEvent) => {
+    if (e.beta === null || e.gamma === null) return;
+    if (zeroBeta === null || zeroGamma === null) {
+      zeroBeta = e.beta;
+      zeroGamma = e.gamma;
+      return;
+    }
+    const dx = Math.max(-1, Math.min(1, (e.gamma - zeroGamma) / GRADI_PIENI));
+    const dy = Math.max(-1, Math.min(1, (e.beta - zeroBeta) / GRADI_PIENI));
+    /* l'asse verticale va rovesciato: inclinando in avanti il campo scende */
+    state.tx = dx * state.scale;
+    state.ty = -dy * state.scale;
+    state.touched = true;
+  };
+
+  /*  Su iOS gli eventi di orientamento non arrivano finché non li si chiede, e
+   *  la richiesta vale solo dentro un gesto dell'utente. Invece di mettere in
+   *  pagina un pulsante per una cosa che altrove funziona da sola, la domanda
+   *  parte al primo tocco: il dialogo è quello di sistema, e se la risposta è
+   *  no non cambia nulla di quello che c'era.
+   */
+  type PermessoOrientamento = { requestPermission?: () => Promise<string> };
+  const chiediGyro = () => {
+    const D = window.DeviceOrientationEvent as unknown as PermessoOrientamento | undefined;
+    if (D && typeof D.requestPermission === "function") {
+      D.requestPermission()
+        .then((esito) => {
+          if (esito === "granted") window.addEventListener("deviceorientation", onOrient);
+        })
+        .catch(() => {});
+    }
+  };
+
   const onKeyDown = (e: KeyboardEvent) => {
     const k = e.key.toLowerCase();
     if (k === " ") {
@@ -396,6 +451,12 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
     if (o.wheel) pt.addEventListener("wheel", onWheel, { passive: false });
   }
   if (o.keys) window.addEventListener("keydown", onKeyDown);
+  if (o.gyro && typeof window.DeviceOrientationEvent !== "undefined") {
+    /* dove il permesso non serve (Android, e iOS già autorizzato) gli eventi
+       cominciano ad arrivare subito; dove serve, li aggancia chiediGyro */
+    window.addEventListener("deviceorientation", onOrient);
+    pt.addEventListener("pointerdown", chiediGyro, { once: true });
+  }
   document.addEventListener("visibilitychange", onVisibility);
 
   /* ----------------------------------------------------------------- ciclo */
@@ -517,6 +578,8 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
       pt.removeEventListener("pointerdown", onDown);
       pt.removeEventListener("pointerleave", onLeave);
       pt.removeEventListener("wheel", onWheel);
+      pt.removeEventListener("pointerdown", chiediGyro);
+      window.removeEventListener("deviceorientation", onOrient);
       /* il contesto va restituito a mano: i browser ne tengono pochi vivi per
          pagina, e in sviluppo ogni rimontaggio ne chiederebbe uno nuovo */
       gl!.getExtension("WEBGL_lose_context")?.loseContext();
