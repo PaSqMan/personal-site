@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { Container } from "@/components/ui/Section";
+import { Container } from "@/components/ui/Container";
 
 export default function NotFound() {
   return (

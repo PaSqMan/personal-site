@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 
-import { Footer } from "@/components/layout/Footer";
 import { site } from "@/content/site";
 
 import "./globals.css";
@@ -54,14 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${sans.variable} ${mono.variable} scroll-smooth antialiased`}
     >
       <body className="flex min-h-svh flex-col font-sans">
-        <a
-          href="#contenuto"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-viola focus:px-5 focus:py-2.5 focus:font-semibold focus:text-on-accent"
-        >
-          Vai al contenuto
-        </a>
-        <div className="flex-1">{children}</div>
-        <Footer />
+        {children}
       </body>
     </html>
   );

@@ -23,7 +23,7 @@ export function Button({
   children: ReactNode;
 }) {
   const base =
-    "inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-mono text-sm no-underline transition hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-viola";
+    "inline-flex min-h-11 items-center gap-2 rounded-full px-5 py-3 font-mono text-sm no-underline sm:min-h-0 sm:py-2.5 transition hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-viola";
   const look =
     tone === "primary"
       ? "bg-viola font-semibold text-on-accent hover:bg-ink"

@@ -294,9 +294,13 @@ export function startPlasma(options: PlasmaOptions): PlasmaHandle | null {
   }
 
   function resize() {
-    /* su schermi molto densi il plasma non guadagna niente a 3x e il costo
-       cresce col quadrato: si taglia a 2 */
-    const d = Math.min(window.devicePixelRatio || 1, 2);
+    /* Il costo cresce col quadrato della densità, e questo shader calcola
+       cinque seni più una palette per pixel. Su schermi molto densi il plasma
+       non guadagna niente a 3x, quindi si taglia a 2; su un telefono si scende
+       a 1.5, dove i glifi restano nitidi ma i pixel da riempire sono meno
+       della metà — su batteria la differenza si sente. */
+    const stretto = Math.min(cv.clientWidth, window.innerWidth || cv.clientWidth) < 640;
+    const d = Math.min(window.devicePixelRatio || 1, stretto ? 1.5 : 2);
     const w = Math.max(1, Math.round(cv.clientWidth * d));
     const h = Math.max(1, Math.round(cv.clientHeight * d));
     if (w === W && h === H && d === dpr) return;
