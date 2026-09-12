@@ -23,7 +23,7 @@ export const site = {
   seo: {
     /* Serve a metadataBase e alla sitemap. Se il sito passa a dominio proprio,
        o a un repository <utente>.github.io, qui va l'indirizzo nuovo. */
-    url: "https://pasqman.github.io/animation",
+    url: "https://pasqman.github.io/personal-site",
     titolo: "Pasquale Di Gennaro — software e IA",
     descrizione:
       "Sviluppo software e sistemi di intelligenza artificiale. Codice di sistema, strumenti, grafica in tempo reale.",

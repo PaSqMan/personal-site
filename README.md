@@ -1,7 +1,7 @@
 # animation
 
-Effetti della demoscene scritti in C per il terminale di Windows, più il sito
-personale che ne riusa uno.
+Il sito personale, più gli effetti della demoscene scritti in C per il
+terminale di Windows da cui viene il suo sfondo.
 
 ## Il sito — site/
 
