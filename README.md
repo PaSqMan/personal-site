@@ -5,7 +5,7 @@ portale web per il plasma.
 
 ## Il sito
 
-[`docs/`](docs/) e la landing page pubblicata con GitHub Pages:
+[`docs/`](docs/) è la landing page pubblicata con GitHub Pages:
 
 - [`index.html`](docs/index.html) - presentazione, con il plasma come sfondo
   dell'intestazione. Il ciclo si ferma quando l'intestazione esce dallo
