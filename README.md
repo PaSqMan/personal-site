@@ -5,20 +5,26 @@ portale web per il plasma.
 
 ## Il sito
 
-[`docs/index.html`](docs/index.html) e' il plasma di
-[`fx_plasma.c`](fx_plasma.c) portato su GPU: stesso campo di seni, stessa
-palette a coseni, stessa rampa di 69 caratteri dell'uscita a terminale, solo
-che i glifi diventano un atlante passato al fragment shader e la griglia di
-celle e' fatta di pixel.
+[`docs/`](docs/) e la landing page pubblicata con GitHub Pages:
+
+- [`index.html`](docs/index.html) - presentazione, con il plasma come sfondo
+  dell'intestazione. Il ciclo si ferma quando l'intestazione esce dallo
+  schermo e riparte quando torna, e rispetta `prefers-reduced-motion`.
+- [`plasma.html`](docs/plasma.html) - la demo a schermo pieno.
+- [`plasma.js`](docs/plasma.js) - il motore condiviso: il plasma di
+  [`fx_plasma.c`](fx_plasma.c) in un fragment shader, con la stessa rampa di
+  69 caratteri dell'uscita a terminale trasformata in un atlante di glifi.
+  Ogni cella sceglie il suo carattere dalla luminanza del campo al proprio
+  centro, e il colore usa la formula di `emit()`.
 
 Il puntatore sposta il centro del termine radiale, lascia un anello che decade
 con la distanza e - se corre - accelera il tempo del campo.
 
-Comandi: `B` caratteri/pixel, `C` colore, `+` `-` corpo dei caratteri, rotella
-per la scala, `spazio` ferma, `R` azzera, `H` nasconde l'interfaccia.
+Comandi della demo: `B` caratteri/pixel, `C` colore, `+` `-` corpo dei
+caratteri, rotella per la scala, `spazio` ferma, `R` azzera, `H` nasconde
+l'interfaccia.
 
-Nessuna dipendenza e nessuna compilazione: un file HTML, si apre anche da
-`file://`.
+Nessuna dipendenza e nessuna compilazione: si apre anche da `file://`.
 
 ## I programmi per il terminale
 
