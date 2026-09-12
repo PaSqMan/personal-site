@@ -41,7 +41,9 @@ export function Hero() {
           />
         </h1>
 
-        <p className="mt-7 max-w-[32em] text-[1.0625rem] text-dim [text-shadow:0_1px_14px_rgba(7,6,12,0.9)] sm:text-xl">
+        {/* La frase è in inglese dentro una pagina in italiano: senza `lang` un
+            lettore di schermo la pronuncerebbe con le regole sbagliate. */}
+        <p lang="en" className="mt-7 max-w-[32em] text-[1.0625rem] text-dim [text-shadow:0_1px_14px_rgba(7,6,12,0.9)] sm:text-xl">
           Building Software and Artificial Intelligence Systems.
         </p>
 

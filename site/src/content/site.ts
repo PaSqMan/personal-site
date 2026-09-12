@@ -25,7 +25,10 @@ export const site = {
        o a un repository <utente>.github.io, qui va l'indirizzo nuovo. */
     url: "https://pasqman.github.io/personal-site",
     titolo: "Pasquale Di Gennaro — software e IA",
+    /* È quello che si legge nei risultati di ricerca e nelle condivisioni:
+       tiene la stessa frase della pagina, tradotta, senza aggiungere niente
+       che in pagina non ci sia. */
     descrizione:
-      "Sviluppo software e sistemi di intelligenza artificiale. Codice di sistema, strumenti, grafica in tempo reale.",
+      "Pasquale Di Gennaro (PaSqMan): sviluppo software e sistemi di intelligenza artificiale.",
   },
 };
